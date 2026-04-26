@@ -17,13 +17,13 @@ st.set_page_config(
 
 with st.sidebar:
     st.divider()
-    st.markdown("### ❤️ Support Developer")
-    st.caption("Developed by Eldwin Manalu")
+    st.markdown("### ❤️ Support UANG Developer")
+    st.caption("DEVELOPED BY ELDWIN MANALU")
     st.write(
         "Dukungan Anda membantu pengembangan, maintenance, dan peningkatan fitur website ini."
     )
     st.link_button(
-        "Dukung via Saweria",
+        "DONASI SEIKHLASNYA via Saweria wkwkwkkwwk",
         "https://saweria.co/eldwinmanalu"
     )
 
@@ -748,6 +748,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Adonan Pangsit", "gram"): 0,
         ("Siomay", "karton"): 0,
         ("Pentol", "karton"): 0,
+        ("Kulit Pangsit", "ball"): 0,
     }
 
     mie_rules = {
@@ -775,7 +776,6 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         summary[("Kecap", "gram")] += terjual * rule["kecap"]
         summary[("Basic Mie", "gram")] += terjual * rule["basic_mie"]
         summary[("Minyak Mie", "gram")] += terjual * 14
-
         summary[("Ayam Cincang", "gram")] += terjual * 8
         summary[("Bawang Goreng", "gram")] += terjual * 4
         summary[("Daun Bawang", "gram")] += terjual * 0.2
@@ -786,20 +786,21 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
     pangsit_goreng_terjual = results.get("Pangsit Goreng", {}).get("total", 0)
     summary[("Pangsit Goreng", "pcs")] += pangsit_goreng_terjual * 5
     summary[("Adonan Pangsit", "gram")] += pangsit_goreng_terjual * 75
+    total_pangsit_goreng_pcs = summary[("Pangsit Goreng", "pcs")]
+    summary[("Kulit Pangsit", "ball")] += total_pangsit_goreng_pcs * 16 / 5000
 
     siomay_terjual = results.get("Siomay", {}).get("total", 0)
     summary[("Siomay", "karton")] += siomay_terjual / 144
 
     udang_keju_terjual = results.get("Udang Keju", {}).get("total", 0)
     udang_rambutan_terjual = results.get("Udang Rambutan", {}).get("total", 0)
-
     total_pentol_pcs = (udang_keju_terjual * 3) + (udang_rambutan_terjual * 3)
     summary[("Pentol", "karton")] += total_pentol_pcs / 480
 
     rows = []
     for (bahan, satuan), qty in summary.items():
         if isinstance(qty, float) and not qty.is_integer():
-            qty = round(qty, 2)
+            qty = round(qty, 4)
         else:
             qty = int(qty)
 
@@ -857,7 +858,7 @@ if uploaded_file is not None:
     try:
         results, mode = process_pdf(uploaded_file)
 
-        st.success(f"Berhasil diproses dengan mode: {mode}")
+        st.success(f'Laporan Promix "{uploaded_file.name}" berhasil diproses')
 
         st.divider()
         st.subheader("Preview Hasil per Kategori")
@@ -910,7 +911,6 @@ if uploaded_file is not None:
 
         st.divider()
         st.subheader("Usage Bahan / Gramasi")
-
         usage_df = build_usage_summary_df(results)
         st.dataframe(usage_df, use_container_width=True, hide_index=True)
 
@@ -929,8 +929,8 @@ st.markdown("""
     z-index: 9999;
     background: rgba(255, 255, 255, 0.92);
     padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 11px;
+    border-radius: 9px;
+    font-size: 12px;
     color: #444444;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
