@@ -1,5 +1,6 @@
 import re
-
+import json
+import streamlit.components.v1 as components
 import pandas as pd
 import streamlit as st
 
@@ -733,6 +734,45 @@ def grouped_frames(results: dict) -> dict:
         frames[category] = pd.DataFrame(rows)
     return frames
 
+def render_copy_column_button(df: pd.DataFrame, column_name: str, label: str, key: str) -> None:
+    if column_name not in df.columns:
+        return
+
+    copy_text = "\n".join(df[column_name].astype(str).tolist())
+    js_text = json.dumps(copy_text)
+
+    components.html(
+        f"""
+        <button
+            id="copy-btn-{key}"
+            style="
+                padding: 6px 12px;
+                border-radius: 8px;
+                border: 1px solid #cccccc;
+                background: #ffffff;
+                cursor: pointer;
+                font-size: 13px;
+                margin-right: 6px;
+                margin-bottom: 8px;
+            "
+        >
+            {label}
+        </button>
+
+        <script>
+        const btn = document.getElementById("copy-btn-{key}");
+        btn.addEventListener("click", async () => {{
+            await navigator.clipboard.writeText({js_text});
+            btn.innerText = "Copied!";
+            setTimeout(() => {{
+                btn.innerText = {json.dumps(label)};
+            }}, 1200);
+        }});
+        </script>
+        """,
+        height=45,
+    )
+
 def build_usage_summary_df(results: dict) -> pd.DataFrame:
     summary = {
         ("Mie", "pcs"): 0,
@@ -906,6 +946,32 @@ if uploaded_file is not None:
                         df = beverage_df[
                         ~beverage_df["Menu"].str.startswith("TOTAL", na=False)
                 ]
+                        
+                copy_col1, copy_col2, copy_col3 = st.columns(3)
+
+                with copy_col1:
+                    render_copy_column_button(
+                        df,
+                        "Dine In",
+                        f"Copy {category} Dine In",
+                        f"{category.lower().replace(' ', '-')}-dine-in",
+                    )
+
+                with copy_col2:
+                    render_copy_column_button(
+                        df,
+                        "Take Away",
+                        f"Copy {category} Take Away",
+                        f"{category.lower().replace(' ', '-')}-take-away",
+                    )
+
+                with copy_col3:
+                    render_copy_column_button(
+                        df,
+                        "Total",
+                        f"Copy {category} Total",
+                        f"{category.lower().replace(' ', '-')}-total",
+                    )
 
                 st.dataframe(df, use_container_width=True, hide_index=True)
 
