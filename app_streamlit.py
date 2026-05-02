@@ -947,9 +947,14 @@ if uploaded_file is not None:
                         ~beverage_df["Menu"].str.startswith("TOTAL", na=False)
                 ]
                         
-                copy_col1, copy_col2, copy_col3 = st.columns(3)
+                copy_menu_col, copy_dine_col, copy_ta_col, copy_total_col = st.columns(
+                    [2.2, 1.6, 1.6, 1.6]
+                )
 
-                with copy_col1:
+                with copy_menu_col:
+                    st.empty()
+
+                with copy_dine_col:
                     render_copy_column_button(
                         df,
                         "Dine In",
@@ -957,7 +962,7 @@ if uploaded_file is not None:
                         f"{category.lower().replace(' ', '-')}-dine-in",
                     )
 
-                with copy_col2:
+                with copy_ta_col:
                     render_copy_column_button(
                         df,
                         "Take Away",
@@ -965,7 +970,7 @@ if uploaded_file is not None:
                         f"{category.lower().replace(' ', '-')}-take-away",
                     )
 
-                with copy_col3:
+                with copy_total_col:
                     render_copy_column_button(
                         df,
                         "Total",
