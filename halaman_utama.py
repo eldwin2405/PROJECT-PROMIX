@@ -976,7 +976,7 @@ st.markdown("""
 <style>
 .dev-footer {
     position: fixed;
-    left: 360px;
+    left: 720px;
     bottom: 12px;
     z-index: 9999;
     background: rgba(255, 255, 255, 0.92);
