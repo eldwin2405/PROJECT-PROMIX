@@ -979,7 +979,7 @@ st.markdown("""
     left: 680px;
     bottom: 12px;
     z-index: 9999;
-    background: rgba(0, 0, 255, 0.92);
+    background: rgba(255, 255, 255, 0.92);
     padding: 8px 15px;
     border-radius: 12px;
     font-size: 14px;
