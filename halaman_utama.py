@@ -9,13 +9,6 @@ try:
 except ImportError:
     import fitz as pymupdf
 
-
-st.set_page_config(
-    page_title="PROMIX PDF Reader",
-    page_icon="📊",
-    layout="wide",
-)
-
 with st.sidebar:
     st.divider()
     st.markdown("### ❤️ Support UANG Developer")
