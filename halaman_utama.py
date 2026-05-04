@@ -983,7 +983,7 @@ st.markdown("""
     padding: 8px 15px;
     border-radius: 12px;
     font-size: 14px;
-    color: #444444;
+    color: #2d3fa6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 </style>
