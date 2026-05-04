@@ -9,18 +9,6 @@ try:
 except ImportError:
     import fitz as pymupdf
 
-with st.sidebar:
-    st.divider()
-    st.markdown("### ❤️ Support UANG Developer")
-    st.caption("DEVELOPED BY ELDWIN MANALU")
-    st.write(
-        "Dukungan Anda membantu pengembangan, maintenance, dan peningkatan fitur website ini."
-    )
-    st.link_button(
-        "DONASI SEIKHLASNYA via Saweria wkwkwkkwwk",
-        "https://saweria.co/eldwinmanalu"
-    )
-
 REQUESTED_ORDER = [
     "Mie Suit",
     "Mie Gacoan Level 0",
