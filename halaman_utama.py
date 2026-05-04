@@ -982,7 +982,7 @@ st.markdown("""
     background: rgba(255, 255, 255, 0.92);
     padding: 8px 15px;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 19px;
     color: #2d3fa6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
