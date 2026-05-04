@@ -151,6 +151,17 @@ TOP_LEVEL_BLOCKS = {
     "PAKET",
 }
 
+PAYMENT_METHODS = [
+    "CASH",
+    "GOFOOD INT",
+    "GRABFOOD INT",
+    "SHOPEEFOOD INT",
+    "QRIS SHOPEE",
+    "QRIS EDC",
+    "QRIS BNI",
+    "QRIS ESB ORDER",
+]
+
 MIE_USAGE_RULES = {
     "Mie Suit": {"cabe": 0},
     "Mie Gacoan Level 0": {"cabe": 0},
@@ -199,6 +210,64 @@ def clean_qty(text: str) -> int:
     if not text:
         return 0
     return int(text.replace(".", "").replace(",", ""))
+
+def make_empty_payments() -> dict:
+    return {method: 0 for method in PAYMENT_METHODS}
+
+
+def extract_payment_data(pdf_bytes: bytes) -> dict:
+    payments = make_empty_payments()
+
+    # Mode 1: coba baca dari tabel PDF
+    try:
+        table_rows = extract_pdf_table_rows(pdf_bytes)
+
+        for row in table_rows:
+            cleaned = [clean_text(cell) for cell in row if clean_text(cell)]
+            if len(cleaned) < 2:
+                continue
+
+            method = cleaned[0].upper()
+            amount_text = cleaned[1]
+
+            if method in payments and is_number_like(amount_text):
+                payments[method] = clean_qty(amount_text)
+
+        if any(value > 0 for value in payments.values()):
+            return payments
+
+    except Exception:
+        pass
+
+    # Mode 2: fallback baca dari teks halaman PDF
+    doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
+
+    for page in doc:
+        text = page.get_text("text", sort=True)
+
+        for raw_line in text.splitlines():
+            line = clean_text(raw_line).upper()
+
+            for method in PAYMENT_METHODS:
+                pattern = rf"^{re.escape(method)}\s+([\d\.,]+)$"
+                match = re.fullmatch(pattern, line)
+
+                if match:
+                    payments[method] = clean_qty(match.group(1))
+
+    return payments
+
+
+def payment_frame(payments: dict) -> pd.DataFrame:
+    rows = []
+
+    for method in PAYMENT_METHODS:
+        rows.append({
+            "Payment Method": method,
+            "Payment Amount": payments.get(method, 0),
+        })
+
+    return pd.DataFrame(rows)
 
 
 def is_number_like(text: str) -> bool:
@@ -835,6 +904,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
 
 def process_pdf(uploaded_file):
     pdf_bytes = uploaded_file.getvalue()
+    payments = extract_payment_data(pdf_bytes)
 
     table_error = None
     try:
@@ -843,7 +913,7 @@ def process_pdf(uploaded_file):
             normalized_rows = normalize_rows_from_tables(table_rows)
             if has_required_markers(normalized_rows):
                 results = parse_target_data(normalized_rows)
-                return results, "table"
+                return results, payments, "table"
     except Exception as e:
         table_error = str(e)
 
@@ -860,7 +930,7 @@ def process_pdf(uploaded_file):
             raise ValueError("Mode blok teks tidak menemukan marker yang cukup.")
 
         results = parse_target_data(normalized_rows)
-        return results, "text"
+        return results, payments, "text"
     except Exception as e:
         if table_error:
             raise ValueError(f"Mode tabel gagal: {table_error} | Mode blok teks gagal: {e}") from e
@@ -877,9 +947,27 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     try:
-        results, mode = process_pdf(uploaded_file)
+        results, payments, mode = process_pdf(uploaded_file)
 
         st.success(f'Laporan Promix "{uploaded_file.name}" berhasil diproses')
+
+        st.divider()
+        st.subheader("Sales Payment Recapitulation/COPAS UNTUK LPH AR")
+
+        payment_df = payment_frame(payments)
+        copy_method_col, copy_amount_col = st.columns([2.2, 1.6])
+        with copy_method_col:
+            st.empty()
+
+        with copy_amount_col:
+            render_copy_column_button(
+                payment_df,
+                "Payment Amount",
+                "Copy Payment Amount",
+                "payment-amount",
+            )
+
+        st.dataframe(payment_df, use_container_width=True, hide_index=True)
 
         st.divider()
         st.subheader("Preview Hasil per Kategori")
@@ -962,7 +1050,7 @@ if uploaded_file is not None:
                 st.dataframe(df, use_container_width=True, hide_index=True)
 
         st.divider()
-        st.subheader("Usage Bahan / Gramasi")
+        st.subheader("Usage Bahan / Gramasi / COST CONTROLLING")
         usage_df = build_usage_summary_df(results)
         st.dataframe(usage_df, use_container_width=True, hide_index=True)
 
@@ -982,7 +1070,7 @@ st.markdown("""
     background: rgba(255, 255, 255, 0.92);
     padding: 8px 15px;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 13px;
     color: #2d3fa6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
