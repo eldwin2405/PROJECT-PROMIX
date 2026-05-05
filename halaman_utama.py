@@ -3,6 +3,7 @@ import json
 import streamlit.components.v1 as components
 import pandas as pd
 import streamlit as st
+from threading import Lock
 
 try:
     import pymupdf
@@ -936,9 +937,40 @@ def process_pdf(uploaded_file):
             raise ValueError(f"Mode tabel gagal: {table_error} | Mode blok teks gagal: {e}") from e
         raise
 
+class VisitCounter:
+    def __init__(self):
+        self.count = 0
+        self.lock = Lock()
+
+    def increment(self):
+        with self.lock:
+            self.count += 1
+            return self.count
+
+    def value(self):
+        with self.lock:
+            return self.count
+
+
+@st.cache_resource
+def get_visit_counter():
+    return VisitCounter()
+
+
+def register_visit_once_per_session():
+    counter = get_visit_counter()
+
+    if "visit_counted" not in st.session_state:
+        st.session_state.visit_counted = True
+        return counter.increment()
+
+    return counter.value()
 
 st.title("PROMIX PDF Reader")
 st.caption("Upload 1 file PDF laporan PROMIX untuk melihat hasil per kategori dan menyiapkan data copy-paste.")
+
+visit_count = register_visit_once_per_session()
+st.metric("Jumlah Kunjungan Website", visit_count)
 
 uploaded_file = st.file_uploader(
     "Upload file PDF PROMIX",
