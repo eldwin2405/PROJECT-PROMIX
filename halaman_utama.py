@@ -970,7 +970,7 @@ st.title("PROMIX PDF Reader")
 st.caption("Upload 1 file PDF laporan PROMIX untuk melihat hasil per kategori dan menyiapkan data copy-paste.")
 
 visit_count = register_visit_once_per_session()
-st.metric("Jumlah Kunjungan Website", visit_count)
+st.caption(f"👀 Jumlah kunjungan sesi: {visit_count}")
 
 uploaded_file = st.file_uploader(
     "Upload file PDF PROMIX",
