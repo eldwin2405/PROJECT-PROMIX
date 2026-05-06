@@ -849,6 +849,8 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Cincau", "gram"): 0,
         ("Nata de Coco", "gram"): 0,
         ("Susu UHT", "ML"): 0,
+        ("Sumpit", "Karung"): 0,
+        ("Paper Box Mie", "Karton"): 0,
     }
 
     mie_rules = {
@@ -868,8 +870,14 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         "Mie Hompimpa Level 8": {"cabe": 30, "kecap": 0, "basic_mie": 16},
     }
 
+    total_mie_take_away = 0
+
     for menu_name, rule in mie_rules.items():
-        terjual = results.get(menu_name, {}).get("total", 0)
+        item = results.get(menu_name, {})
+        terjual = item.get("total", 0)
+        take_away = item.get("take_away", 0)
+
+        total_mie_take_away += take_away
 
         summary[("Mie", "pcs")] += terjual
         summary[("Cabe", "gram")] += terjual * rule["cabe"]
@@ -910,6 +918,15 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
 
     es_sluku_bathok_terjual = results.get("Es Sluku Bathok", {}).get("total", 0)
     summary[(("Susu UHT", "ML"))] += es_sluku_bathok_terjual * 130
+
+    total_mie_pcs = summary[("Mie", "pcs")]
+    summary[(("Sumpit", "Karung"))] += total_mie_pcs / 3000
+    
+    packaging_mie = results.get("Packaging Mie", {}).get("total", 0)
+    pangsit_goreng_take_away = results.get("Pangsit Goreng", {}).get("take_away", 0)
+
+    paper_box_mie_pcs = total_mie_take_away + packaging_mie + pangsit_goreng_take_away
+    summary[("Paper Box Mie", "Karton")] += paper_box_mie_pcs / 500
 
     rows = []
     for (bahan, satuan), qty in summary.items():
