@@ -3,7 +3,10 @@ import json
 import streamlit.components.v1 as components
 import pandas as pd
 import streamlit as st
+from datetime import datetime, timedelta
 from threading import Lock
+import uuid
+
 
 try:
     import pymupdf
@@ -957,40 +960,58 @@ def process_pdf(uploaded_file):
             raise ValueError(f"Mode tabel gagal: {table_error} | Mode blok teks gagal: {e}") from e
         raise
 
-class VisitCounter:
+
+class LiveVisitorTracker:
     def __init__(self):
-        self.count = 0
+        self.sessions = {}
         self.lock = Lock()
 
-    def increment(self):
+    def heartbeat(self, session_id: str):
+        now = datetime.now()
         with self.lock:
-            self.count += 1
-            return self.count
+            self.sessions[session_id] = now
+            self.cleanup(now)
+            return len(self.sessions)
 
-    def value(self):
+    def cleanup(self, now=None, timeout_seconds=120):
+        if now is None:
+            now = datetime.now()
+
+        expired_before = now - timedelta(seconds=timeout_seconds)
+
+        expired_sessions = [
+            session_id
+            for session_id, last_seen in self.sessions.items()
+            if last_seen < expired_before
+        ]
+
+        for session_id in expired_sessions:
+            del self.sessions[session_id]
+
+    def active_count(self):
+        now = datetime.now()
         with self.lock:
-            return self.count
+            self.cleanup(now)
+            return len(self.sessions)
 
 
 @st.cache_resource
-def get_visit_counter():
-    return VisitCounter()
+def get_live_visitor_tracker():
+    return LiveVisitorTracker()
 
 
-def register_visit_once_per_session():
-    counter = get_visit_counter()
+def register_live_visitor():
+    if "live_session_id" not in st.session_state:
+        st.session_state.live_session_id = str(uuid.uuid4())
 
-    if "visit_counted" not in st.session_state:
-        st.session_state.visit_counted = True
-        return counter.increment()
-
-    return counter.value()
+    tracker = get_live_visitor_tracker()
+    return tracker.heartbeat(st.session_state.live_session_id)
 
 st.title("PROMIX PDF Reader")
 st.caption("Upload 1 file PDF laporan PROMIX untuk melihat hasil per kategori dan menyiapkan data copy-paste.")
 
-visit_count = register_visit_once_per_session()
-st.caption(f"👀 Jumlah kunjungan sesi: {visit_count}")
+live_visitors = register_live_visitor()
+st.caption(f"🟢 Pengunjung sedang aktif: {live_visitors}")
 
 uploaded_file = st.file_uploader(
     "Upload file PDF PROMIX",
