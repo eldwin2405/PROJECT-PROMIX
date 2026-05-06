@@ -840,6 +840,12 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Siomay", "karton"): 0,
         ("Pentol", "karton"): 0,
         ("Kulit Pangsit", "ball"): 0,
+        ("Surai Naga", "pack"): 0,
+        ("Buah Apel", "gram"): 0,
+        ("Buah Peer", "gram"): 0,
+        ("Cincau", "gram"): 0,
+        ("Nata de Coco", "gram"): 0,
+        ("Susu UHT", "ML"): 0,
     }
 
     mie_rules = {
@@ -873,6 +879,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         summary[("Kerupuk Pangsit", "pcs")] += terjual * 8
         summary[("Pangsit Goreng", "pcs")] += terjual * 2
         summary[("Adonan Pangsit", "gram")] += terjual * 30
+        
 
     pangsit_goreng_terjual = results.get("Pangsit Goreng", {}).get("total", 0)
     summary[("Pangsit Goreng", "pcs")] += pangsit_goreng_terjual * 5
@@ -885,8 +892,21 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
 
     udang_keju_terjual = results.get("Udang Keju", {}).get("total", 0)
     udang_rambutan_terjual = results.get("Udang Rambutan", {}).get("total", 0)
+
     total_pentol_pcs = (udang_keju_terjual * 3) + (udang_rambutan_terjual * 3)
     summary[("Pentol", "karton")] += total_pentol_pcs / 480
+
+    summary[("Surai Naga", "pack")] += udang_rambutan_terjual * 45 / 2000
+
+    es_gobak_sodor_terjual = results.get("Es Gobak Sodor", {}).get("total", 0)
+    es_teklek_terjual = results.get("Es Teklek", {}).get("total", 0)
+    summary[("Buah Apel", "gram")] += es_gobak_sodor_terjual * 12
+    summary[("Buah Peer", "gram")] += es_gobak_sodor_terjual * 27
+    summary[("Cincau", "gram")] += (es_gobak_sodor_terjual + es_teklek_terjual) * 22
+    summary[("Nata de Coco", "gram")] += (es_gobak_sodor_terjual + es_teklek_terjual) * 22
+
+    es_sluku_bathok_terjual = results.get("Es Sluku Bathok", {}).get("total", 0)
+    summary[(("Susu UHT", "ML"))] += es_sluku_bathok_terjual * 130
 
     rows = []
     for (bahan, satuan), qty in summary.items():
