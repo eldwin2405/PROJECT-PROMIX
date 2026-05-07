@@ -837,7 +837,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Ayam Cincang", "gram"): 0,
         ("Bawang Goreng", "gram"): 0,
         ("Daun Bawang", "gram"): 0,
-        ("Kerupuk Pangsit", "pcs"): 0,
+        ("Kerupuk Mie", "pack"): 0,
         ("Pangsit Goreng", "pcs"): 0,
         ("Adonan Pangsit", "gram"): 0,
         ("Siomay", "karton"): 0,
@@ -851,6 +851,11 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Susu UHT", "ML"): 0,
         ("Sumpit", "Karung"): 0,
         ("Paper Box Mie", "Karton"): 0,
+        ("Paper Box Dimsum", "Karton"): 0,
+        ("Air Mineral", "Karton"): 0,
+        ("Gula Pasir (Bukan Biang Gula)", "Kg"): 0,
+        ("Es Tube (ESTIMASI)", "Kg"): 0,
+        ("Lumpia Udang", "karton"): 0,
     }
 
     mie_rules = {
@@ -887,7 +892,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         summary[("Ayam Cincang", "gram")] += terjual * 8
         summary[("Bawang Goreng", "gram")] += terjual * 4
         summary[("Daun Bawang", "gram")] += terjual * 0.2
-        summary[("Kerupuk Pangsit", "pcs")] += terjual * 8
+        summary[("Kerupuk Mie", "pack")] += terjual * 8 * 0.9 / 2000
         summary[("Pangsit Goreng", "pcs")] += terjual * 2
         summary[("Adonan Pangsit", "gram")] += terjual * 30
         
@@ -927,6 +932,71 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
 
     paper_box_mie_pcs = total_mie_take_away + packaging_mie + pangsit_goreng_take_away
     summary[("Paper Box Mie", "Karton")] += paper_box_mie_pcs / 500
+
+    udang_keju_take_away = results.get("Udang Keju", {}).get("take_away", 0)
+    udang_rambutan_take_away = results.get("Udang Rambutan", {}).get("take_away", 0)
+    siomay_take_away = results.get("Siomay", {}).get("take_away", 0)
+    lumpia_udang_take_away = results.get("Lumpia Udang", {}).get("take_away", 0)
+    packaging_dimsum = results.get("Packaging Dimsum", {}).get("total", 0)
+
+    paper_box_dimsum_pcs = (
+        udang_keju_take_away
+        + udang_rambutan_take_away
+        + siomay_take_away
+        + lumpia_udang_take_away
+        + packaging_dimsum
+    )
+    summary[("Paper Box Dimsum", "Karton")] += paper_box_dimsum_pcs / 500
+
+    air_mineral_terjual = results.get("Air Mineral", {}).get("total",0)
+    summary[("Air Mineral", "Karton")] += air_mineral_terjual / 24
+
+    milo_terjual = results.get("Total Milo", {}).get("total", 0)
+    teh_tarik_terjual = results.get("Total Teh Tarik", {}).get("total", 0)
+    thai_tea_terjual = results.get("Thai Tea", {}).get("total", 0)
+    thai_green_tea_terjual = results.get("Thai Green Tea", {}).get("total", 0)
+    tea_terjual = results.get("Total Tea", {}).get("total", 0)
+
+    total_gula_pasir_gram = (
+        milo_terjual * 6.5
+        + teh_tarik_terjual * 20
+        + thai_tea_terjual * 15
+        + thai_green_tea_terjual * 15
+        + tea_terjual * 30
+    )
+
+    summary[("Gula Pasir (Bukan Biang Gula)", "Kg")] += total_gula_pasir_gram / 1000
+
+    beverage_items_for_es_tube = [
+    "Air Mineral",
+    "Lemon Tea Hot",
+    "Lemon Tea Ice",
+    "Orange Hot",
+    "Orange Ice",
+    "Teh Tarik Hot",
+    "Teh Tarik Ice",
+    "Milo Hot",
+    "Milo Ice",
+    "Vanilla Latte Hot",
+    "Vanilla Latte Ice",
+    "Tea Hot",
+    "Tea Ice",
+    "Thai Tea",
+    "Thai Green Tea",
+    "Es Gobak Sodor",
+    "Es Teklek",
+    "Es Petak Umpet",
+    "Es Sluku Bathok",
+    ]
+
+    total_beverages_terjual = sum(
+        results.get(item, {}).get("total", 0)
+        for item in beverage_items_for_es_tube
+    )
+    summary[("Es Tube (ESTIMASI)", "Kg")] += total_beverages_terjual * 200 / 1000
+
+    lumpia_udang_terjual = results.get("Lumpia Udang", {}).get("total", 0)
+    summary[("Lumpia Udang", "karton")] += lumpia_udang_terjual * 3 / 456
 
     rows = []
     for (bahan, satuan), qty in summary.items():
@@ -990,7 +1060,7 @@ class LiveVisitorTracker:
             self.cleanup(now)
             return len(self.sessions)
 
-    def cleanup(self, now=None, timeout_seconds=120):
+    def cleanup(self, now=None, timeout_seconds=300):
         if now is None:
             now = datetime.now()
 
@@ -1024,7 +1094,7 @@ def register_live_visitor():
     tracker = get_live_visitor_tracker()
     return tracker.heartbeat(st.session_state.live_session_id)
 
-st.title("PROMIX PDF Reader")
+st.title("PROMIX PDF Reader SUPAYA CICILAN PROMIX ANDA LEBIH NGEBUT !!")
 st.caption("Upload 1 file PDF laporan PROMIX untuk melihat hasil per kategori dan menyiapkan data copy-paste.")
 
 live_visitors = register_live_visitor()
@@ -1042,7 +1112,7 @@ if uploaded_file is not None:
         st.success(f'Laporan Promix "{uploaded_file.name}" berhasil diproses')
 
         st.divider()
-        st.subheader("Sales Payment Recapitulation/COPAS UNTUK LPH AR")
+        st.subheader("Sales Payment Recapitulation/COPY PASTE UNTUK LPH AR")
 
         payment_df = payment_frame(payments)
         copy_method_col, copy_amount_col = st.columns([2.2, 1.6])
