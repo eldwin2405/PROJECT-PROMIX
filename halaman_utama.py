@@ -1154,13 +1154,13 @@ if uploaded_file is not None:
             with st.expander(category, expanded=(category == "Mie")):
                 if category == "Beverages":
                     hide_beverage_totals = st.checkbox(
-                        "Copy Beverages hanya Item Hot dan Ice",
+                        "Copy Beverages hanya Item Hot dan Ice (centang salah satu atau tidak centang keduanya sama sekali)",
                         value=True,
                         key="hide_beverage_totals",
                         )
 
                     show_only_beverage_totals = st.checkbox(
-                        "Copy Beverages tidak ada Item hot dan Ice",
+                        "Copy Beverages tidak ada Item hot dan Ice (centang salah satu atau tidak centang keduanya sama sekali)",
                         value=False,
                         key="show_only_beverage_totals",
                         )
