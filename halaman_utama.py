@@ -161,7 +161,7 @@ PAYMENT_METHODS = [
     "GRABFOOD INT",
     "SHOPEEFOOD INT",
     "QRIS SHOPEE",
-    "QRIS EDC",
+    "EDC",
     "QRIS BNI",
     "QRIS ESB ORDER",
 ]
