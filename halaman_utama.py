@@ -817,7 +817,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Siomay", "karton"): 0,
         ("Pentol", "karton"): 0,
         ("Lumpia Udang", "karton"): 0,
-        ("Adonan Pangsit", "gram"): 0,
+        ("Adonan Pangsit", "Karton"): 0,
         ("Basic Mie", "gram"): 0,
         ("Bawang Goreng", "gram"): 0,
         ("Minyak Mie", "gram"): 0,
@@ -864,12 +864,12 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         summary[("Daun Bawang", "gram")] += terjual * 0.2
         summary[("Kerupuk Mie", "pack")] += terjual * 8 * 0.9 / 2000
         summary[("Pangsit Goreng", "pcs")] += terjual * 2
-        summary[("Adonan Pangsit", "gram")] += terjual * 30
+        summary[("Adonan Pangsit", "Karton")] += terjual * 30 / 1000 / 15
         
 
     pangsit_goreng_terjual = results.get("Pangsit Goreng", {}).get("total", 0)
     summary[("Pangsit Goreng", "pcs")] += pangsit_goreng_terjual * 5
-    summary[("Adonan Pangsit", "gram")] += pangsit_goreng_terjual * 75
+    summary[("Adonan Pangsit", "Karton")] += pangsit_goreng_terjual * 75 / 1000 / 15
     total_pangsit_goreng_pcs = summary[("Pangsit Goreng", "pcs")]
     summary[("Kulit Pangsit", "ball")] += total_pangsit_goreng_pcs * 16 / 5000
 
@@ -1138,7 +1138,7 @@ if uploaded_file is not None:
                         value=True,
                         on_change=on_hide_beverage_totals_change,
                     )
-                    
+
                     show_only_beverage_totals = st.checkbox(
                         "Copy Beverages tidak ada Item hot dan Ice",
                         key="show_only_beverage_totals",
