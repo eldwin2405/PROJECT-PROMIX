@@ -166,42 +166,11 @@ PAYMENT_METHODS = [
     "QRIS ESB ORDER",
 ]
 
-MIE_USAGE_RULES = {
-    "Mie Suit": {"cabe": 0},
-    "Mie Gacoan Level 0": {"cabe": 0},
-    "Mie Gacoan Level 1": {"cabe": 5},
-    "Mie Gacoan Level 2": {"cabe": 10},
-    "Mie Gacoan Level 3": {"cabe": 15},
-    "Mie Gacoan Level 4": {"cabe": 20},
-    "Mie Gacoan Level 6": {"cabe": 25},
-    "Mie Gacoan Level 8": {"cabe": 30},
-    "Mie Hompimpa Level 1": {"cabe": 5},
-    "Mie Hompimpa Level 2": {"cabe": 10},
-    "Mie Hompimpa Level 3": {"cabe": 15},
-    "Mie Hompimpa Level 4": {"cabe": 20},
-    "Mie Hompimpa Level 6": {"cabe": 25},
-    "Mie Hompimpa Level 8": {"cabe": 30},
-}
-
-USAGE_RULES = {}
-
-for menu_name, rule in MIE_USAGE_RULES.items():
-    USAGE_RULES[menu_name] = [
-        {"bahan": "Mie", "qty_per_porsi": 1, "satuan": "pcs"},
-        {"bahan": "Cabe", "qty_per_porsi": rule["cabe"], "satuan": "gram"},
-        {"bahan": "Adonan Pangsit", "qty_per_porsi": 30, "satuan": "gram"},
-    ]
-
-USAGE_RULES["Pangsit Goreng"] = [
-    {"bahan": "Adonan Pangsit", "qty_per_porsi": 75, "satuan": "gram"},
-]
-
 def make_empty_result():
     return {
         name: {"menu": name, "dine_in": 0, "take_away": 0, "total": 0}
         for name in REQUESTED_ORDER
     }
-
 
 def clean_text(value) -> str:
     if value is None:
@@ -923,10 +892,10 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
     summary[("Nata de Coco", "gram")] += (es_gobak_sodor_terjual + es_teklek_terjual) * 22
 
     es_sluku_bathok_terjual = results.get("Es Sluku Bathok", {}).get("total", 0)
-    summary[(("Susu UHT", "ML"))] += es_sluku_bathok_terjual * 130
+    summary[("Susu UHT", "ML")] += es_sluku_bathok_terjual * 130
 
     total_mie_pcs = summary[("Mie", "pcs")]
-    summary[(("Sumpit", "Karung"))] += total_mie_pcs / 3000
+    summary[("Sumpit", "Karung")] += total_mie_pcs / 3000
     
     packaging_mie = results.get("Packaging Mie", {}).get("total", 0)
     pangsit_goreng_take_away = results.get("Pangsit Goreng", {}).get("take_away", 0)
@@ -1095,6 +1064,15 @@ def register_live_visitor():
     tracker = get_live_visitor_tracker()
     return tracker.heartbeat(st.session_state.live_session_id)
 
+def on_hide_beverage_totals_change():
+    if st.session_state.get("hide_beverage_totals", False):
+        st.session_state["show_only_beverage_totals"] = False
+
+
+def on_show_only_beverage_totals_change():
+    if st.session_state.get("show_only_beverage_totals", False):
+        st.session_state["hide_beverage_totals"] = False
+
 st.title("PROMIX PDF Reader SUPAYA CICILAN PROMIX ANDA LEBIH NGEBUT !!")
 st.caption("Upload 1 file PDF laporan PROMIX untuk melihat hasil per kategori dan menyiapkan data copy-paste.")
 
@@ -1155,16 +1133,18 @@ if uploaded_file is not None:
             with st.expander(category, expanded=(category == "Mie")):
                 if category == "Beverages":
                     hide_beverage_totals = st.checkbox(
-                        "Copy Beverages hanya Item Hot dan Ice (centang salah satu atau tidak centang keduanya sama sekali)",
-                        value=True,
+                        "Copy Beverages hanya Item Hot dan Ice",
                         key="hide_beverage_totals",
-                        )
-
+                        value=True,
+                        on_change=on_hide_beverage_totals_change,
+                    )
+                    
                     show_only_beverage_totals = st.checkbox(
-                        "Copy Beverages tidak ada Item hot dan Ice (centang salah satu atau tidak centang keduanya sama sekali)",
-                        value=False,
+                        "Copy Beverages tidak ada Item hot dan Ice",
                         key="show_only_beverage_totals",
-                        )
+                        value=False,
+                        on_change=on_show_only_beverage_totals_change,
+                    )
 
                     beverage_df = df.copy()
 
