@@ -848,7 +848,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         ("Siomay", "karton"): 0,
         ("Pentol", "karton"): 0,
         ("Lumpia Udang", "karton"): 0,
-        ("Adonan Pangsit", "gram"): 0,
+        ("Adonan Pangsit", "Karton"): 0,
         ("Basic Mie", "gram"): 0,
         ("Bawang Goreng", "gram"): 0,
         ("Minyak Mie", "gram"): 0,
@@ -895,7 +895,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         summary[("Daun Bawang", "gram")] += terjual * 0.2
         summary[("Kerupuk Mie", "pack")] += terjual * 8 * 0.9 / 2000
         summary[("Pangsit Goreng", "pcs")] += terjual * 2
-        summary[("Adonan Pangsit", "gram")] += terjual * 30
+        summary[("Adonan Pangsit", "Karton")] += terjual * 30 / 1500 / 10
         
 
     pangsit_goreng_terjual = results.get("Pangsit Goreng", {}).get("total", 0)
