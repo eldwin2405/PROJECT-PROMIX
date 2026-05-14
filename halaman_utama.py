@@ -890,7 +890,7 @@ def build_usage_summary_df(results: dict) -> pd.DataFrame:
         summary[("Kecap", "gram")] += terjual * rule["kecap"]
         summary[("Basic Mie", "gram")] += terjual * rule["basic_mie"]
         summary[("Minyak Mie", "gram")] += terjual * 14
-        summary[("Ayam Cincang", "Karton")] += terjual * 8 / 12
+        summary[("Ayam Cincang", "Karton")] += terjual * 8 / 1000 / 12
         summary[("Bawang Goreng", "gram")] += terjual * 4
         summary[("Daun Bawang", "gram")] += terjual * 0.2
         summary[("Kerupuk Mie", "pack")] += terjual * 8 * 0.9 / 2000
